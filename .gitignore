@@ -1,0 +1,4 @@
+pkg/
+.vscode/
+bin/
+src/__pycache__

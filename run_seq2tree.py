@@ -32,31 +32,35 @@ weight_decay = 1e-5
 beam_size = 5
 n_layers = 2
 
-data = load_raw_data("data/Math_23K.json")
+data_train = load_raw_data("data/maths_train_pretty.json", True)
+data_test = load_raw_data("data/maths_test_pretty.json", False)
 
-pairs = transfer_num(data)
-temp_pairs = []
-for p in pairs:
-    temp_pairs.append((p[0], p[1], p[2], p[3], p[4]))
-pairs = temp_pairs
-fold_size = int(len(pairs) * 0.2)
-fold_pairs = []
-for split_fold in range(4):
-    fold_start = fold_size * split_fold
-    fold_end = fold_size * (split_fold + 1)
-    fold_pairs.append(pairs[fold_start:fold_end])
-fold_pairs.append(pairs[(fold_size * 4):])
+pairs_trained = transfer_num(data_train)
+pairs_tested = transfer_num(data_test)
 
-best_acc_fold = []
+
+# pairs.append((input_seq, nums, num_pos, answer, id2))
+# for p in pairs:
+#     temp_pairs.append((p[0], p[1], p[2], p[3], p[4]))
+# pairs = temp_pairs
+# fold_size = int(len(pairs) * 0.2)
+# fold_pairs = []
+# for split_fold in range(4):
+#     fold_start = fold_size * split_fold
+#     fold_end = fold_size * (split_fold + 1)
+#     fold_pairs.append(pairs[fold_start:fold_end])
+# fold_pairs.append(pairs[(fold_size * 4):])
+
+# best_acc_fold = []
 
 fold = 1 #we can also iterate all the folds like GTS
-pairs_tested = []
-pairs_trained = []
-for fold_t in range(5):
-    if fold_t == fold:
-        pairs_tested += fold_pairs[fold_t]
-    else:
-        pairs_trained += fold_pairs[fold_t]
+# pairs_tested = []
+# pairs_trained = []
+# for fold_t in range(5):
+#     if fold_t == fold:
+#         pairs_tested += fold_pairs[fold_t]
+#     else:
+#         pairs_trained += fold_pairs[fold_t]
 
 input_lang, output_lang, train_pairs, test_pairs = prepare_data(pairs_trained, pairs_tested, 5)
 # Initialize models
@@ -86,6 +90,7 @@ merge_scheduler = torch.optim.lr_scheduler.StepLR(merge_optimizer, step_size=20,
 
 # Move models to GPU
 if USE_CUDA:
+    print("Using CUDA")
     encoder.cuda()
     predict.cuda()
     generate.cuda()

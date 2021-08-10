@@ -91,21 +91,24 @@ class Lang:
             self.word2index[j] = i
 
 
-def load_raw_data(filename):  # load the json data to list(dict()) for MATH 23K
+def load_raw_data(filename, is_train):  # load the json data to list(dict()) for MATHS
     print("Reading lines...")
     f = open(filename, encoding="utf-8")
     js = ""
     data = []
+    id_count = 0
+    line_mod = 7 if is_train else 5
     for i, s in enumerate(f):
         js += s
         i += 1
-        if i % 7 == 0:  # every 7 line is a json
+        if i % line_mod == 0:  # every n line is a json
             data_d = json.loads(js)
-            if "千米/小时" in data_d["equation"]:
-                data_d["equation"] = data_d["equation"][:-5]
+            data_d["id"] = id_count
             data.append(data_d)
             js = ""
+            id_count +=1
     #data = sorted(data, key=lambda item: len(item["equation"]))
+    print(f"Loaded {id_count}")
     return data
 
 # remove the superfluous brackets
@@ -128,153 +131,6 @@ def remove_brackets(x):
     return y
 
 
-def load_mawps_data(filename):  # load the json data to list(dict()) for MAWPS
-    print("Reading lines...")
-    f = open(filename, encoding="utf-8")
-    data = json.load(f)
-    out_data = []
-    for d in data:
-        if "lEquations" not in d or len(d["lEquations"]) != 1:
-            continue
-        x = d["lEquations"][0].replace(" ", "")
-
-        if "lQueryVars" in d and len(d["lQueryVars"]) == 1:
-            v = d["lQueryVars"][0]
-            if v + "=" == x[:len(v)+1]:
-                xt = x[len(v)+1:]
-                if len(set(xt) - set("0123456789.+-*/()")) == 0:
-                    temp = d.copy()
-                    temp["lEquations"] = xt
-                    out_data.append(temp)
-                    continue
-
-            if "=" + v == x[-len(v)-1:]:
-                xt = x[:-len(v)-1]
-                if len(set(xt) - set("0123456789.+-*/()")) == 0:
-                    temp = d.copy()
-                    temp["lEquations"] = x
-                    out_data.append(temp)
-                    continue
-
-        if len(set(x) - set("0123456789.+-*/()=xX")) != 0:
-            continue
-
-        if x[:2] == "x=" or x[:2] == "X=":
-            if len(set(x[2:]) - set("0123456789.+-*/()")) == 0:
-                temp = d.copy()
-                temp["lEquations"] = x[2:]
-                out_data.append(temp)
-                continue
-        if x[-2:] == "=x" or x[-2:] == "=X":
-            if len(set(x[:-2]) - set("0123456789.+-*/()")) == 0:
-                temp = d.copy()
-                temp["lEquations"] = x[:-2]
-                out_data.append(temp)
-                continue
-    return out_data
-
-
-def load_roth_data(filename):  # load the json data to dict(dict()) for roth data
-    print("Reading lines...")
-    f = open(filename, encoding="utf-8")
-    data = json.load(f)
-    out_data = {}
-    for d in data:
-        if "lEquations" not in d or len(d["lEquations"]) != 1:
-            continue
-        x = d["lEquations"][0].replace(" ", "")
-
-        if "lQueryVars" in d and len(d["lQueryVars"]) == 1:
-            v = d["lQueryVars"][0]
-            if v + "=" == x[:len(v)+1]:
-                xt = x[len(v)+1:]
-                if len(set(xt) - set("0123456789.+-*/()")) == 0:
-                    temp = d.copy()
-                    temp["lEquations"] = remove_brackets(xt)
-                    y = temp["sQuestion"]
-                    seg = y.strip().split(" ")
-                    temp_y = ""
-                    for s in seg:
-                        if len(s) > 1 and (s[-1] == "," or s[-1] == "." or s[-1] == "?"):
-                            temp_y += s[:-1] + " " + s[-1:] + " "
-                        else:
-                            temp_y += s + " "
-                    temp["sQuestion"] = temp_y[:-1]
-                    out_data[temp["iIndex"]] = temp
-                    continue
-
-            if "=" + v == x[-len(v)-1:]:
-                xt = x[:-len(v)-1]
-                if len(set(xt) - set("0123456789.+-*/()")) == 0:
-                    temp = d.copy()
-                    temp["lEquations"] = remove_brackets(xt)
-                    y = temp["sQuestion"]
-                    seg = y.strip().split(" ")
-                    temp_y = ""
-                    for s in seg:
-                        if len(s) > 1 and (s[-1] == "," or s[-1] == "." or s[-1] == "?"):
-                            temp_y += s[:-1] + " " + s[-1:] + " "
-                        else:
-                            temp_y += s + " "
-                    temp["sQuestion"] = temp_y[:-1]
-                    out_data[temp["iIndex"]] = temp
-                    continue
-
-        if len(set(x) - set("0123456789.+-*/()=xX")) != 0:
-            continue
-
-        if x[:2] == "x=" or x[:2] == "X=":
-            if len(set(x[2:]) - set("0123456789.+-*/()")) == 0:
-                temp = d.copy()
-                temp["lEquations"] = remove_brackets(x[2:])
-                y = temp["sQuestion"]
-                seg = y.strip().split(" ")
-                temp_y = ""
-                for s in seg:
-                    if len(s) > 1 and (s[-1] == "," or s[-1] == "." or s[-1] == "?"):
-                        temp_y += s[:-1] + " " + s[-1:] + " "
-                    else:
-                        temp_y += s + " "
-                temp["sQuestion"] = temp_y[:-1]
-                out_data[temp["iIndex"]] = temp
-                continue
-        if x[-2:] == "=x" or x[-2:] == "=X":
-            if len(set(x[:-2]) - set("0123456789.+-*/()")) == 0:
-                temp = d.copy()
-                temp["lEquations"] = remove_brackets(x[2:])
-                y = temp["sQuestion"]
-                seg = y.strip().split(" ")
-                temp_y = ""
-                for s in seg:
-                    if len(s) > 1 and (s[-1] == "," or s[-1] == "." or s[-1] == "?"):
-                        temp_y += s[:-1] + " " + s[-1:] + " "
-                    else:
-                        temp_y += s + " "
-                temp["sQuestion"] = temp_y[:-1]
-                out_data[temp["iIndex"]] = temp
-                continue
-    return out_data
-
-# for testing equation
-# def out_equation(test, num_list):
-#     test_str = ""
-#     for c in test:
-#         if c[0] == "N":
-#             x = num_list[int(c[1:])]
-#             if x[-1] == "%":
-#                 test_str += "(" + x[:-1] + "/100.0" + ")"
-#             else:
-#                 test_str += x
-#         elif c == "^":
-#             test_str += "**"
-#         elif c == "[":
-#             test_str += "("
-#         elif c == "]":
-#             test_str += ")"
-#         else:
-#             test_str += c
-#     return test_str
-
 
 def transfer_num(data):  # transfer num into "NUM"
     print("Transfer numbers...")
@@ -286,12 +142,8 @@ def transfer_num(data):  # transfer num into "NUM"
     for d in data:
         nums = []
         input_seq = []
-        seg = d["segmented_text"].strip().split(" ")
-        answer = d["ans"]
-        fractions = re.findall("\d+\(\d+\/\d+\)", answer)
-        if len(fractions):
-            answer = answer.replace("(", "+(")
-        equations = d["equation"][2:]
+        seg = d["problem"].strip().split(" ")
+        answer = d["solution"] if "solution" in d.keys() else None
         id2 = d["id"]
         i = 0
         for s in seg:
@@ -464,133 +316,6 @@ def transfer_english_num(data):  # transfer num into "NUM"
     return pairs, temp_g, copy_nums
 
 
-def transfer_roth_num(data):  # transfer num into "NUM"
-    print("Transfer numbers...")
-    pattern = re.compile("\d+,\d+|\d+\.\d+|\d+")
-    pairs = {}
-    generate_nums = {}
-    copy_nums = 0
-    for key in data:
-        d = data[key]
-        nums = []
-        input_seq = []
-        seg = d["sQuestion"].strip().split(" ")
-        equations = d["lEquations"]
-
-        for s in seg:
-            pos = re.search(pattern, s)
-            if pos:
-                if pos.start() > 0:
-                    input_seq.append(s[:pos.start()])
-                num = s[pos.start(): pos.end()]
-                # if num[-2:] == ".0":
-                #     num = num[:-2]
-                # if "." in num and num[-1] == "0":
-                #     num = num[:-1]
-                nums.append(num.replace(",", ""))
-                input_seq.append("NUM")
-                if pos.end() < len(s):
-                    input_seq.append(s[pos.end():])
-            else:
-                input_seq.append(s)
-
-        if copy_nums < len(nums):
-            copy_nums = len(nums)
-        eq_segs = []
-        temp_eq = ""
-        for e in equations:
-            if e not in "()+-*/":
-                temp_eq += e
-            elif temp_eq != "":
-                count_eq = []
-                for n_idx, n in enumerate(nums):
-                    if abs(float(n) - float(temp_eq)) < 1e-4:
-                        count_eq.append(n_idx)
-                        if n != temp_eq:
-                            nums[n_idx] = temp_eq
-                if len(count_eq) == 0:
-                    flag = True
-                    for gn in generate_nums:
-                        if abs(float(gn) - float(temp_eq)) < 1e-4:
-                            generate_nums[gn] += 1
-                            if temp_eq != gn:
-                                temp_eq = gn
-                            flag = False
-                    if flag:
-                        generate_nums[temp_eq] = 0
-                    eq_segs.append(temp_eq)
-                elif len(count_eq) == 1:
-                    eq_segs.append("N"+str(count_eq[0]))
-                else:
-                    eq_segs.append(temp_eq)
-                eq_segs.append(e)
-                temp_eq = ""
-            else:
-                eq_segs.append(e)
-        if temp_eq != "":
-            count_eq = []
-            for n_idx, n in enumerate(nums):
-                if abs(float(n) - float(temp_eq)) < 1e-4:
-                    count_eq.append(n_idx)
-                    if n != temp_eq:
-                        nums[n_idx] = temp_eq
-            if len(count_eq) == 0:
-                flag = True
-                for gn in generate_nums:
-                    if abs(float(gn) - float(temp_eq)) < 1e-4:
-                        generate_nums[gn] += 1
-                        if temp_eq != gn:
-                            temp_eq = gn
-                        flag = False
-                if flag:
-                    generate_nums[temp_eq] = 0
-                eq_segs.append(temp_eq)
-            elif len(count_eq) == 1:
-                eq_segs.append("N" + str(count_eq[0]))
-            else:
-                eq_segs.append(temp_eq)
-
-        # def seg_and_tag(st):  # seg the equation and tag the num
-        #     res = []
-        #     pos_st = re.search(pattern, st)
-        #     if pos_st:
-        #         p_start = pos_st.start()
-        #         p_end = pos_st.end()
-        #         if p_start > 0:
-        #             res += seg_and_tag(st[:p_start])
-        #         st_num = st[p_start:p_end]
-        #         if st_num[-2:] == ".0":
-        #             st_num = st_num[:-2]
-        #         if "." in st_num and st_num[-1] == "0":
-        #             st_num = st_num[:-1]
-        #         if nums.count(st_num) == 1:
-        #             res.append("N"+str(nums.index(st_num)))
-        #         else:
-        #             res.append(st_num)
-        #         if p_end < len(st):
-        #             res += seg_and_tag(st[p_end:])
-        #     else:
-        #         for sst in st:
-        #             res.append(sst)
-        #     return res
-        # out_seq = seg_and_tag(equations)
-
-        # for s in out_seq:  # tag the num which is generated
-        #     if s[0].isdigit() and s not in generate_nums and s not in nums:
-        #         generate_nums.append(s)
-        num_pos = []
-        for i, j in enumerate(input_seq):
-            if j == "NUM":
-                num_pos.append(i)
-        if len(nums) != 0:
-            pairs[key] = (input_seq, eq_segs, nums, num_pos)
-
-    temp_g = []
-    for g in generate_nums:
-        if generate_nums[g] >= 5:
-            temp_g.append(g)
-
-    return pairs, temp_g, copy_nums
 
 
 # Return a list of indexes, one for each word in the sentence, plus EOS

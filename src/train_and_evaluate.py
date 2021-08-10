@@ -438,7 +438,7 @@ def train_tree(input_batch, input_length, num_size_batch,
     else:
         num_iteration = int(len(fix_target_list)/mapo_batch_size)
 
-    loss = torch.tensor([[0]])
+    loss = float(torch.tensor([[0]]))
 
     for j in range (num_iteration):
         if not j * mapo_batch_size + mapo_batch_size - 1 < len(fix_target_list):
