@@ -23,7 +23,7 @@ model = options.model
 n_step = options.nstep 
 model_name = options.name
 
-batch_size = 64
+batch_size = 32
 embedding_size = 128
 hidden_size = 512
 n_epochs = 100
