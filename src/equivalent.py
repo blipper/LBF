@@ -91,10 +91,10 @@ class NotEqual:
     def __eq__(self, other):
         return False
 
-image_regex = re.compile(r".*[asy].*[/asy]", re.MULTILINE)
+image_regex = re.compile(r"\[asy\].*\[/asy\]", re.MULTILINE + re.DOTALL)
 
 def strip_string(string):
-    print(f"starting_string: {string}")
+    #print(f"starting_string: {string}")
     # linebreaks  
     string = string.replace("\n", "")
     #print(string)
@@ -132,7 +132,7 @@ def strip_string(string):
     # remove dollar signs
     string = string.replace("\\$", "")
     
-    #string = image_regex.sub("", string)
+    string = image_regex.sub("", string)
 
     # remove units (on the right)
     #string = remove_right_units(string)
@@ -171,6 +171,18 @@ def strip_string(string):
 
     # NOTE: X/Y changed to \frac{X}{Y} in dataset, but in simple cases fix in case the model output is X/Y
     string = fix_a_slash_b(string)
+
+    string = string.replace(" one ","1")
+    string = string.replace(" two ","2")
+    string = string.replace(" three ","3")
+    string = string.replace(" four ","4")
+    string = string.replace(" five ","5")
+    string = string.replace(" six ","6")
+    string = string.replace(" seven ","7")
+    string = string.replace(" eight ","8")
+    string = string.replace(" nine ","9")
+    string = string.replace(" zero ","0")
+
 
     # Remove empty latex math mode
     string = string.replace("$$","")

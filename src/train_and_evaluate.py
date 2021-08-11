@@ -192,14 +192,14 @@ def train_tree(input_batch, input_length, num_size_batch,
     for i in input_length:
         seq_mask.append([0 for _ in range(i)] + [1 for _ in range(i, max_len)])
     seq_mask = torch.ByteTensor(seq_mask)
-    print(f"num_list: {num_list}")
+    #print(f"num_list: {num_list}")
     gen_length1 = [2*len(i)-1 for i in num_list]
     gen_length2 = [2*len(i)+1 for i in num_list]
     gen_length3 = [2*len(i)+3 for i in num_list]
     # gen_length4 = [2*len(i)+5 for i in num_list]
     # gen_length5 = [max(2*len(i)-3, 1) for i in num_list]
     gen_lengths = [gen_length1, gen_length2, gen_length3]
-    print(f"gen_lengths: {gen_lengths}")
+    #print(f"gen_lengths: {gen_lengths}")
 
     num_mask = []
     max_num_size = max(num_size_batch) + 2
@@ -210,10 +210,11 @@ def train_tree(input_batch, input_length, num_size_batch,
 
     batch_size = len(input_length)
 
-    output_sen = ""
-    for widx in input_batch[2]:
-        output_sen += input_lang.index2word[widx] + " "
-    print(output_sen)
+    for ib_idx, ib in enumerate(input_batch):
+        output_sen = ""
+        for widx in ib:
+            output_sen += input_lang.index2word[widx] + " "
+        print(f"input_batch {ib_idx}:  {output_sen}")
     # Turn padded arrays into (batch_size x max_len) tensors, transpose into (max_len x batch_size)
     input_var = torch.LongTensor(input_batch).transpose(0, 1)
 
@@ -362,26 +363,25 @@ def train_tree(input_batch, input_length, num_size_batch,
             if fix_found[idx] == True:
                 continue
             generate_exp = out_expression_list(exp, output_lang, num)
-            print(f"{idx} {exp} {num} {generate_exp}")
             all_list = output_lang.index2word[: num_start + 2] + num
             probs = all_node_outputs_mask[idx].detach().cpu().numpy()
             probs = probs[:target_length[idx]]
             probs = probs[:, :num_start+2+len(num)]
 
             if model in ['fix', 'ma-fix']:
-                fix = find_fix(
-                            generate_exp[:target_length[idx]],
-                            num_ans[idx],
-                            probs,
-                            all_list,
-                            num_start,
-                            n_step)
+                try:
+                    fix = find_fix(
+                                generate_exp[:target_length[idx]],
+                                num_ans[idx],
+                                probs,
+                                all_list,
+                                num_start,
+                                n_step)
 
-                if len(fix):
-                    fix_found[idx] = True
-                    fix_exp = out_expression_list(fix, output_lang, num)
-                    fix_infix = prefix_to_infix(fix_exp, target_length[idx])
-                    try:
+                    if len(fix):
+                        fix_found[idx] = True
+                        fix_exp = out_expression_list(fix, output_lang, num)
+                        fix_infix = prefix_to_infix(fix_exp, target_length[idx])
                         y = eval(fix_infix)
                         if y == eval(num_ans[idx]):
                             if model == 'fix':
@@ -393,9 +393,11 @@ def train_tree(input_batch, input_length, num_size_batch,
                                 if not fix in buffer_batch_new[idx]:
                                     buffer_batch_new[idx].append(fix)
                                     buffer_batch_new_exp[idx].append(fix_infix)
-                    except:
-                        pass
-                
+                except:
+                    print(f"Failed at {idx}")
+                    print(f"{idx} {exp} {num} {generate_exp}")
+                    pass
+                    
                 
 
             if model in ['reinforce', 'mapo']:
