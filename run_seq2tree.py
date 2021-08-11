@@ -129,11 +129,10 @@ for epoch in range(n_epochs):
             mask_flag = True
         buffer_batches_train = buffer_batches[pos : pos + len(input_lengths[idx])]
         buffer_batches_train_exp = buffer_batches_exp[pos : pos + len(input_lengths[idx])]
-
         loss, buffer_batch_new, iterations, buffer_batch_exp = train_tree(
             input_batches[idx], input_lengths[idx], 
             num_size_batches[idx], encoder, predict, generate, merge,
-            encoder_optimizer, predict_optimizer, generate_optimizer, merge_optimizer, output_lang, num_pos_batches[idx], num_ans_batches[idx], nums_batches[idx], buffer_batches_train, buffer_batches_train_exp, epoch, model, n_step, mask_flag)
+            encoder_optimizer, predict_optimizer, generate_optimizer, merge_optimizer, output_lang, num_pos_batches[idx], num_ans_batches[idx], nums_batches[idx], buffer_batches_train, buffer_batches_train_exp, epoch, input_lang, model, n_step, mask_flag)
         loss_total += loss
         iteration += iterations
         epo_iteration += iterations

@@ -6,6 +6,7 @@ import re
 
 PAD_token = 0
 
+from src.equivalent import strip_string
 
 class Lang:
     """
@@ -142,20 +143,20 @@ def transfer_num(data):  # transfer num into "NUM"
     for d in data:
         nums = []
         input_seq = []
-        seg = d["problem"].strip().split(" ")
+        seg = strip_string(d["problem"].strip()).split(" ")
         answer = d["solution"] if "solution" in d.keys() else None
         id2 = d["id"]
         i = 0
         for s in seg:
             pos = re.search(pattern, s)
-            if pos and pos.start() == 0:
+            while pos is not None:
+                input_seq.append(s[0:pos.start()])
                 nums.append(s[pos.start(): pos.end()])
                 input_seq.append("NUM"+str(i))
-                if pos.end() < len(s):
-                    input_seq.append(s[pos.end():])
                 i += 1
-            else:
-                input_seq.append(s)
+                s=s[pos.end()+1:]
+                pos = re.search(pattern, s)
+            input_seq.append(s)
         nums_fraction = []
 
         for num in nums:
