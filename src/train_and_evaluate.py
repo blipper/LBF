@@ -152,7 +152,13 @@ def get_all_number_encoder_outputs(encoder_outputs, num_pos, batch_size, num_siz
         masked_index = masked_index.cuda()
     all_outputs = encoder_outputs.transpose(0, 1).contiguous()
     all_embedding = all_outputs.view(-1, encoder_outputs.size(2))  # S x B x H -> (B x S) x H
-    all_num = all_embedding.index_select(0, indices)
+    try:
+        all_num = all_embedding.index_select(0, indices)
+    except:
+        print(indices)
+        print(num_pos)
+        print(all_embedding.shape)
+        quit()
     all_num = all_num.view(batch_size, num_size, hidden_size)
     return all_num.masked_fill_(masked_index, 0.0)
 
@@ -214,7 +220,7 @@ def train_tree(input_batch, input_length, num_size_batch,
         output_sen = ""
         for widx in ib:
             output_sen += input_lang.index2word[widx] + " "
-        print(f"input_batch {ib_idx}:  {output_sen}")
+        print(f"input_batch {ib_idx}:  {output_sen} {input_batch}")
     # Turn padded arrays into (batch_size x max_len) tensors, transpose into (max_len x batch_size)
     input_var = torch.LongTensor(input_batch).transpose(0, 1)
 

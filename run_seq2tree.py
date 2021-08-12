@@ -169,6 +169,12 @@ for epoch in range(n_epochs):
         for k in range(len(test_pairs)):
             test_batch = test_pairs[k]
             test_exps = []
+            print(f"test_batch: {test_batch}")
+            output_sen = ""
+            for widx in test_batch[0]:
+                output_sen += input_lang.index2word[widx] + " "
+            print(f"test_batch {test_batch[5]}:  {output_sen}")
+
             test_results = evaluate_tree(test_batch[0], test_batch[1], encoder, predict, generate,
                                         merge, output_lang, test_batch[3], beam_size=beam_size)
             #test_res = test_results[0]

@@ -146,19 +146,23 @@ def transfer_num(data):  # transfer num into "NUM"
         nums = []
         input_seq = []
         seg = strip_string(d["problem"].strip()).split(" ")
+        seg = [x for x in seg if len(x)>0] # Remove any empty strings (due to spaces)
         answer = d["solution"] if "solution" in d.keys() else None
         id2 = d["id"]
         i = 0
         for s in seg:
+            assert(len(s)>0)
             pos = re.search(pattern, s)
             while pos is not None:
-                input_seq.append(s[0:pos.start()])
+                if len(s[0:pos.start()])>0:
+                    input_seq.append(s[0:pos.start()])
                 nums.append(s[pos.start(): pos.end()])
                 input_seq.append("NUM"+str(i))
                 i += 1
-                s=s[pos.end()+1:]
+                s=s[pos.end():]
                 pos = re.search(pattern, s)
-            input_seq.append(s)
+            if len(s)>0:
+                input_seq.append(s)
         nums_fraction = []
 
         for num in nums:
@@ -169,8 +173,12 @@ def transfer_num(data):  # transfer num into "NUM"
         num_pos = []
         for i, j in enumerate(input_seq):
             if "NUM" in j:
-                num_pos.append(i)                
+                num_pos.append(i)
+                assert(i) < len(input_seq)
         assert len(nums) == len(num_pos)
+        for i, j in enumerate(num_pos):
+            assert input_seq[j].startswith("NUM") , f"{i}{j}"
+
         retPair = (input_seq, nums, num_pos, answer, id2)
         if len(nums)==0:
             print(f"WARNING: Can't find any numbrs in {retPair}. Skipping.")
@@ -329,6 +337,7 @@ def transfer_english_num(data):  # transfer num into "NUM"
 def indexes_from_sentence(lang, sentence, tree=False):
     res = []
     for word in sentence:
+        assert len(word)>0, f"{sentence}" 
         if len(word) == 0:
             continue
         if "NUM" in word:

@@ -92,6 +92,7 @@ class NotEqual:
         return False
 
 image_regex = re.compile(r"\[asy\].*\[/asy\]", re.MULTILINE + re.DOTALL)
+math_regex = re.compile(r"(\d+)([*\-+/])(\d+)")
 
 def strip_string(string):
     #print(f"starting_string: {string}")
@@ -142,6 +143,9 @@ def strip_string(string):
     string = string.replace("\\%", "")
     string = string.replace("\%", "")
 
+    # Space out operators
+    string = math_regex.sub(r"\1 \2 \3", string)
+
     # " 0." equivalent to " ." and "{0." equivalent to "{." Alternatively, add "0" if "." is the start of the string
     string = string.replace(" .", " 0.")
     string = string.replace("{.", "{0.")
@@ -186,7 +190,7 @@ def strip_string(string):
 
     # Remove empty latex math mode
     string = string.replace("$$","")
-
+    string = string.strip()
     print(f"striped_string: {string}")
     return string
 
