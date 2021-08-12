@@ -194,7 +194,7 @@ def strip_string(string):
     # Remove empty latex math mode
     string = string.replace("$$","")
     string = string.strip()
-    print(f"striped_string: {string}")
+    #print(f"striped_string: {string}")
     return string
 
 def is_equiv(str1, str2, verbose=False):
