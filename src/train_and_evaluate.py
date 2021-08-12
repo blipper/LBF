@@ -593,7 +593,7 @@ def train_tree(input_batch, input_length, num_size_batch,
         generate_optimizer.step()
         merge_optimizer.step()
 
-    loss = loss.item() if num_iteration == 0 else loss.item()/num_iteration
+    loss = loss if num_iteration == 0 else loss/num_iteration
     return loss, buffer_batch_new, num_iteration, buffer_batch_new_exp  # , loss_0.item(), loss_1.item()
     # return 0
 

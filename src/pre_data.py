@@ -92,7 +92,7 @@ class Lang:
             self.word2index[j] = i
 
 
-def load_raw_data(filename, is_train):  # load the json data to list(dict()) for MATHS
+def load_raw_data(filename, is_train, number_of_problems):  # load the json data to list(dict()) for MATHS
     print("Reading lines...")
     f = open(filename, encoding="utf-8")
     js = ""
@@ -108,6 +108,8 @@ def load_raw_data(filename, is_train):  # load the json data to list(dict()) for
             data.append(data_d)
             js = ""
             id_count +=1
+            if number_of_problems!=0 and id_count > number_of_problems:
+                break
     #data = sorted(data, key=lambda item: len(item["equation"]))
     print(f"Loaded {id_count}")
     return data
@@ -167,11 +169,15 @@ def transfer_num(data):  # transfer num into "NUM"
         num_pos = []
         for i, j in enumerate(input_seq):
             if "NUM" in j:
-                num_pos.append(i)
+                num_pos.append(i)                
         assert len(nums) == len(num_pos)
+        retPair = (input_seq, nums, num_pos, answer, id2)
+        if len(nums)==0:
+            print(f"WARNING: Can't find any numbrs in {retPair}. Skipping.")
+        else:
+            pairs.append(retPair)
         # pairs.append((input_seq, out_seq, nums, num_pos, d["ans"]))
         
-        pairs.append((input_seq, nums, num_pos, answer, id2))
     #     string = str(len(nums))
     #     string2 = str((len(out_seq)))
     #     if string not in count_dict.keys():
