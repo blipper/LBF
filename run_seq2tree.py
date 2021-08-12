@@ -176,6 +176,7 @@ for epoch in range(n_epochs):
 
             test_results = evaluate_tree(test_batch[0], test_batch[1], encoder, predict, generate,
                                         merge, output_lang, test_batch[3], beam_size=beam_size)
+            #print(test_results)
             #test_res = test_results[0]
             for i in range (0, len(test_results)):
                 test_res = test_results[i]

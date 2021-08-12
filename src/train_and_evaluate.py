@@ -121,15 +121,20 @@ def compute_prefix_tree_result(test_res, ans, output_lang, num_list):
     try:
         test_exp = prefix_to_infix(test)
     except:
+        print(f"Cannot convert test to test_exp: {test}")
         test_exp = None
     if test is None:
+        print(f"Cannot get test expr: {test_exp}")
         return False, test_exp
     try:
-        if abs(compute_prefix_expression(test) - eval(ans)) < 1e-4:
+        computed = compute_prefix_expression(test) 
+        if computed and abs(computed - eval(ans)) < 1e-4:
             return True, test_exp
         else:
+            print(f"Incorrect - Ans {ans} Predicted: {computed} Expression: {test_exp}")
             return False, test_exp
     except:
+        print(f"Can't compute prefix expression Expression: {test_exp}")
         return False, test_exp
 
 def get_all_number_encoder_outputs(encoder_outputs, num_pos, batch_size, num_size, hidden_size):
