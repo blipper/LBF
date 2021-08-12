@@ -145,7 +145,7 @@ def get_all_number_encoder_outputs(encoder_outputs, num_pos, batch_size, num_siz
         indices += [0 for _ in range(len(num_pos[b]), num_size)]
         masked_index += [temp_1 for _ in range(len(num_pos[b]), num_size)]
     indices = torch.LongTensor(indices)
-    masked_index = torch.ByteTensor(masked_index)
+    masked_index = torch.BoolTensor(masked_index)
     masked_index = masked_index.view(batch_size, num_size, hidden_size)
     if USE_CUDA:
         indices = indices.cuda()
@@ -191,7 +191,7 @@ def train_tree(input_batch, input_length, num_size_batch,
     max_len = max(input_length)
     for i in input_length:
         seq_mask.append([0 for _ in range(i)] + [1 for _ in range(i, max_len)])
-    seq_mask = torch.ByteTensor(seq_mask)
+    seq_mask = torch.BoolTensor(seq_mask)
     #print(f"num_list: {num_list}")
     gen_length1 = [2*len(i)-1 for i in num_list]
     gen_length2 = [2*len(i)+1 for i in num_list]
@@ -206,7 +206,7 @@ def train_tree(input_batch, input_length, num_size_batch,
     for i in num_size_batch:
         d = i
         num_mask.append([0] * 2 + [0] * d + [1] * (max_num_size - d - 2))
-    num_mask = torch.ByteTensor(num_mask)
+    num_mask = torch.BoolTensor(num_mask)
 
     batch_size = len(input_length)
 
@@ -477,14 +477,14 @@ def train_tree(input_batch, input_length, num_size_batch,
         max_len = max(input_length_mapo)
         for i in input_length_mapo:
             seq_mask.append([0 for _ in range(i)] + [1 for _ in range(i, max_len)])
-        seq_mask = torch.ByteTensor(seq_mask)
+        seq_mask = torch.BoolTensor(seq_mask)
 
         num_mask = []
         max_num_size = max(num_size_mapo_batch) + 2
         for i in num_size_mapo_batch:
             d = i
             num_mask.append([0] * 2 + [0] * d + [1] * (max_num_size - d - 2))
-        num_mask = torch.ByteTensor(num_mask)
+        num_mask = torch.BoolTensor(num_mask)
 
         batch_size = len(input_length_mapo)
 
@@ -601,11 +601,11 @@ def train_tree(input_batch, input_length, num_size_batch,
 def evaluate_tree(input_batch, input_length, encoder, predict, generate, merge, output_lang, num_pos,
                   beam_size=5, english=False, max_length=MAX_OUTPUT_LENGTH):
 
-    seq_mask = torch.ByteTensor(1, input_length).fill_(0)
+    seq_mask = torch.BoolTensor(1, input_length).fill_(0)
     # Turn padded arrays into (batch_size x max_len) tensors, transpose into (max_len x batch_size)
     input_var = torch.LongTensor(input_batch).unsqueeze(1)
 
-    num_mask = torch.ByteTensor(1, 2+len(num_pos)).fill_(0)
+    num_mask = torch.BoolTensor(1, 2+len(num_pos)).fill_(0)
 
     # Set to not-training mode to disable dropout
     encoder.eval()
