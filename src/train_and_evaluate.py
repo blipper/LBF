@@ -121,20 +121,20 @@ def compute_prefix_tree_result(test_res, ans, output_lang, num_list):
     try:
         test_exp = prefix_to_infix(test)
     except:
-        print(f"Cannot convert test to test_exp: {test}")
+        #print(f"Cannot convert test to test_exp: {test}")
         test_exp = None
     if test is None:
-        print(f"Cannot get test expr: {test_exp}")
+        #print(f"Cannot get test expr: {test_exp}")
         return False, test_exp
     try:
         computed = compute_prefix_expression(test) 
         if computed and abs(computed - eval(ans)) < 1e-4:
             return True, test_exp
         else:
-            print(f"Incorrect - Ans {ans} Predicted: {computed} Expression: {test_exp}")
+         #   print(f"Incorrect - Ans {ans} Predicted: {computed} Expression: {test_exp}")
             return False, test_exp
     except:
-        print(f"Can't compute prefix expression Expression: {test_exp}")
+        #print(f"Can't compute prefix expression Expression: {test_exp}")
         return False, test_exp
 
 def get_all_number_encoder_outputs(encoder_outputs, num_pos, batch_size, num_size, hidden_size):
@@ -219,7 +219,7 @@ def train_tree(input_batch, input_length, num_size_batch,
         output_sen = ""
         for widx in ib:
             output_sen += input_lang.index2word[widx] + " "
-        print(f"input_batch {ib_idx}:  {output_sen} {input_batch}")
+        #print(f"input_batch {ib_idx}:  {output_sen} {input_batch}")
     # Turn padded arrays into (batch_size x max_len) tensors, transpose into (max_len x batch_size)
     input_var = torch.LongTensor(input_batch).transpose(0, 1)
 
