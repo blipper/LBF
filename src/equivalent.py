@@ -138,6 +138,9 @@ def strip_string(string):
     # remove units (on the right)
     #string = remove_right_units(string)
 
+    string = string.replace("\\cdot", "*")
+    string = string.replace("\\times", "*")
+   
 
     # remove percentage
     string = string.replace("\\%", "")

@@ -169,7 +169,6 @@ for epoch in range(n_epochs):
         for k in range(len(test_pairs)):
             test_batch = test_pairs[k]
             test_exps = []
-            print(f"test_batch: {test_batch}")
             output_sen = ""
             for widx in test_batch[0]:
                 output_sen += input_lang.index2word[widx] + " "

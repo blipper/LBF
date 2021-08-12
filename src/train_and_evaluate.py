@@ -152,13 +152,7 @@ def get_all_number_encoder_outputs(encoder_outputs, num_pos, batch_size, num_siz
         masked_index = masked_index.cuda()
     all_outputs = encoder_outputs.transpose(0, 1).contiguous()
     all_embedding = all_outputs.view(-1, encoder_outputs.size(2))  # S x B x H -> (B x S) x H
-    try:
-        all_num = all_embedding.index_select(0, indices)
-    except:
-        print(indices)
-        print(num_pos)
-        print(all_embedding.shape)
-        quit()
+    all_num = all_embedding.index_select(0, indices)
     all_num = all_num.view(batch_size, num_size, hidden_size)
     return all_num.masked_fill_(masked_index, 0.0)
 
