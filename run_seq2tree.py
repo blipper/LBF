@@ -17,6 +17,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--model', default='fix', type=str, choices=['fix','ma-fix','reinforce','mapo'], help='training method')
 parser.add_argument('--nstep', default=50, type=int, help='m-fix')
 parser.add_argument('--name', default='fix', type=str, help='model name')
+parser.add_argument('--number-of-problems', default='0', type=int, help='Number of training problems to use. 0 is all.')
+
 
 options = parser.parse_args()
 model = options.model
@@ -62,7 +64,7 @@ fold = 1 #we can also iterate all the folds like GTS
 #     else:
 #         pairs_trained += fold_pairs[fold_t]
 
-input_lang, output_lang, train_pairs, test_pairs = prepare_data(pairs_trained, pairs_tested, 5)
+input_lang, output_lang, train_pairs, test_pairs = prepare_data(pairs_trained, pairs_tested, 1)
 # Initialize models
 encoder = EncoderSeq(input_size=input_lang.n_words, embedding_size=embedding_size, hidden_size=hidden_size,
                         n_layers=n_layers)
