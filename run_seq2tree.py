@@ -36,7 +36,7 @@ beam_size = 5
 n_layers = 2
 
 data_train = load_raw_data("data/maths_train_pretty.json", True, number_of_problems)
-data_test = load_raw_data("data/maths_test_pretty.json", False, 0)
+data_test = load_raw_data("data/maths_test_pretty.json", False, number_of_problems)
 
 pairs_trained = transfer_num(data_train)
 pairs_tested = transfer_num(data_test)
