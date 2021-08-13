@@ -402,7 +402,8 @@ def train_tree(input_batch, input_length, num_size_batch,
                                 if not fix in buffer_batch_new[idx]:
                                     buffer_batch_new[idx].append(fix)
                                     buffer_batch_new_exp[idx].append(fix_infix)
-                except:
+                except Exception as e:
+                    print(e)
                     print(f"Failed at {idx}")
                     print(f"{idx} {exp} {num} {generate_exp}")
                     pass

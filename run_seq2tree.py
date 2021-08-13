@@ -26,7 +26,7 @@ n_step = options.nstep
 model_name = options.name
 number_of_problems = options.number_of_problems
 
-batch_size = 32
+batch_size = 16
 embedding_size = 128
 hidden_size = 512
 n_epochs = 100
