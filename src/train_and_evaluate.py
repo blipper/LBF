@@ -9,6 +9,7 @@ import torch.optim
 import torch.nn.functional as f
 import time
 import numpy as np
+import sys
 
 MAX_OUTPUT_LENGTH = 45
 MAX_INPUT_LENGTH = 120
@@ -387,7 +388,10 @@ def train_tree(input_batch, input_length, num_size_batch,
                         fix_found[idx] = True
                         fix_exp = out_expression_list(fix, output_lang, num)
                         fix_infix = prefix_to_infix(fix_exp, target_length[idx])
-                        y = eval(fix_infix)
+                        try:
+                            y = eval(fix_infix)
+                        except ZeroDivisionError:
+                            y = sys.maxint
                         if y == eval(num_ans[idx]):
                             if model == 'fix':
                                 fix_target_list.append(fix)                                                                                                                                                                                                                     

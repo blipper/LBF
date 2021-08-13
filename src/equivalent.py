@@ -133,6 +133,9 @@ def strip_string(string):
     # remove dollar signs
     string = string.replace("\\$", "")
     
+    # pi
+    string = string.replace("\\pi", "3.14")
+
     string = image_regex.sub("", string)
 
     # remove units (on the right)
