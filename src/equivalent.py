@@ -1,6 +1,14 @@
 import re
 
-def fix_fracs(string):
+def find_all_occurences(sample_str, sub):
+    start = 0
+    while True:
+        start = sample_str.find(sub, start)
+        if start == -1: return
+        yield start
+        start += len(sub) # use start += 1 to find overlapping matches
+
+def normalize_fracs(string):
     substrs = string.split("\\frac")
     new_str = substrs[0]
     if len(substrs) > 1:
@@ -30,6 +38,44 @@ def fix_fracs(string):
                         new_str += "{" + a + "}" + b
     string = new_str
     return string
+
+def fix_frac(sample_str):
+    new_str = sample_str
+    left_brackets = list(find_all_occurences(new_str, '{'))
+    right_brackets = list(find_all_occurences(new_str, '}'))
+    fracs = list(find_all_occurences(new_str, '\\frac'))
+    for frac_idx in range(len(fracs)):
+        # Assuming no nested sqrts
+        # Remove occurence of "\\frac"
+        occurence = fracs[frac_idx]
+        new_str = new_str[:occurence] + new_str[occurence+5:] 
+        left_brackets = [x - 5 for x in left_brackets] # Update { bracket indices
+        right_brackets = [x - 5 for x in right_brackets] # Update } bracket indices
+        fracs = [x - 5 for x in fracs] # Update fracs bracket indices
+
+        # Replace the first "{" corresponding to this fraction 
+        new_str = new_str[:occurence] + "(" + new_str[occurence + 1:]
+
+        # Replace the first "}" corresponding to this fraction, add the division operator
+        right_brackets_relative = [x - occurence for x in right_brackets]
+        next_right_bracket_idx = right_brackets_relative.index(min([i for i in right_brackets_relative if i > 0]))
+        next_right_bracket = right_brackets[next_right_bracket_idx]
+        new_str = new_str[:next_right_bracket] + ")/" + new_str[next_right_bracket + 1:]
+        left_brackets = [x +1 for x in left_brackets] # Update { bracket indices
+        right_brackets = [x +1 for x in right_brackets] # Update } bracket indices
+        fracs = [x +1 for x in fracs] # Update fracs bracket indices
+
+        # Replace the second "{" corresponding to this fraction 
+        next_left_bracket = next_right_bracket + 2
+        new_str = new_str[:next_left_bracket] + "(" + new_str[next_left_bracket + 1:]
+
+        # Replace the second "{" corresponding to this fraction 
+        right_brackets_relative = [x - next_left_bracket for x in right_brackets]
+        next_right_bracket_idx = right_brackets_relative.index(min([i for i in right_brackets_relative if i > 0]))
+        next_right_bracket = right_brackets[next_right_bracket_idx]
+        new_str = new_str[:next_right_bracket] + ")" + new_str[next_right_bracket + 1:]
+
+    return new_str
 
 def fix_a_slash_b(string):
     if len(string.split("/")) != 2:
@@ -87,36 +133,29 @@ def normalize_sqrt(string):
         new_string += new_substr
     return new_string
 
-def find_all_occurences(sample_str, sub):
-    start = 0
-    while True:
-        start = sample_str.find(sub, start)
-        if start == -1: return
-        yield start
-        start += len(sub) # use start += 1 to find overlapping matches
-
 def fix_sqrt(sample_str):
     new_str = sample_str
     right_brackets = list(find_all_occurences(new_str, '}'))
     sqrts = list(find_all_occurences(new_str, '\\sqrt'))
     for sqrt_idx in range(len(sqrts)):
-      occurence = sqrts[sqrt_idx]
+        occurence = sqrts[sqrt_idx]
+        
+        # Assuming no nested sqrts
+        # Remove occurence of "\\sqrt"
+        new_str = new_str[:occurence] + new_str[occurence+5:]
+        right_brackets = [x - 5 for x in right_brackets] # Update bracket indices
+        # Replace the "{" corresponding to this \\sqrt occurence with "(" 
+        new_str = new_str[:occurence] + "(" + new_str[occurence + 1:]
+        # Replace the "}" corresponding to this \\sqrt occurence with ")^(1/2)"
+        right_brackets_relative = [x - occurence for x in right_brackets]
+        next_right_bracket_idx = right_brackets_relative.index(min([i for i in right_brackets_relative if i > 0]))
+        next_right_bracket = right_brackets[next_right_bracket_idx]
+        new_str = new_str[:next_right_bracket] + ")^(1/2)" + new_str[next_right_bracket + 1:]
 
-      # Assuming no nested sqrts
-      # Remove occurence of "\\sqrt"
-      new_str = new_str[:occurence] + new_str[occurence+5:]
-      right_brackets = [x - 5 for x in right_brackets] # Update bracket indices
-      # Replace the "{" corresponding to this \\sqrt occurence with "(" 
-      new_str = new_str[:occurence] + "(" + new_str[occurence + 1:]
-      # Replace the "}" corresponding to this \\sqrt occurence with ")^.5"
-      right_brackets_relative = [x - occurence for x in right_brackets]
-      next_right_bracket_idx = right_brackets_relative.index(min([i for i in right_brackets_relative if i > 0]))
-      next_right_bracket = right_brackets[next_right_bracket_idx]
-      new_str = new_str[:next_right_bracket] + ")^.5" + new_str[next_right_bracket + 1:]
-
-      #update indicies after changing string
-      sqrts = [x - 2 for x in sqrts]
-      right_brackets = [x + 3 for x in right_brackets]
+        #update indicies after changing string
+        sqrts = [x + 1  for x in sqrts]
+        right_brackets = [x + 6 for x in right_brackets]
+        
     return new_str
 
 class NotEqual:
@@ -208,11 +247,10 @@ def strip_string(string):
     #string = string.replace(" ", "")
 
     # \frac1b or \frac12 --> \frac{1}{b} and \frac{1}{2}, etc. Even works with \frac1{72} (but not \frac{72}1). Also does a/b --> \\frac{a}{b}
-    string = fix_fracs(string)
+    string = normalize_fracs(string)
 
-    # manually change 0.5 --> \frac{1}{2}
-    if string == "0.5":
-        string = "\\frac{1}{2}"
+    # fix fracs for real, using Alex's method
+    string = fix_frac(string)
 
     # NOTE: X/Y changed to \frac{X}{Y} in dataset, but in simple cases fix in case the model output is X/Y
     string = fix_a_slash_b(string)
