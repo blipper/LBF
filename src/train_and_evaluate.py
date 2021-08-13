@@ -391,7 +391,7 @@ def train_tree(input_batch, input_length, num_size_batch,
                         try:
                             y = eval(fix_infix)
                         except ZeroDivisionError:
-                            y = sys.maxint
+                            y = sys.maxsize
                         if y == eval(num_ans[idx]):
                             if model == 'fix':
                                 fix_target_list.append(fix)                                                                                                                                                                                                                     
