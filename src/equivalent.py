@@ -73,7 +73,7 @@ def order(string):
         return string
     return new_str
 
-def fix_sqrt(string):
+def normalize_sqrt(string):
     if "\\sqrt" not in string:
         return string
     splits = string.split("\\sqrt")
@@ -86,6 +86,38 @@ def fix_sqrt(string):
             new_substr = "\\sqrt" + split
         new_string += new_substr
     return new_string
+
+def find_all_occurences(sample_str, sub):
+    start = 0
+    while True:
+        start = sample_str.find(sub, start)
+        if start == -1: return
+        yield start
+        start += len(sub) # use start += 1 to find overlapping matches
+
+def fix_sqrt(sample_str):
+    new_str = sample_str
+    right_brackets = list(find_all_occurences(new_str, '}'))
+    sqrts = list(find_all_occurences(new_str, '\\sqrt'))
+    for sqrt_idx in range(len(sqrts)):
+      occurence = sqrts[sqrt_idx]
+
+      # Assuming no nested sqrts
+      # Remove occurence of "\\sqrt"
+      new_str = new_str[:occurence] + new_str[occurence+5:]
+      right_brackets = [x - 5 for x in right_brackets] # Update bracket indices
+      # Replace the "{" corresponding to this \\sqrt occurence with "(" 
+      new_str = new_str[:occurence] + "(" + new_str[occurence + 1:]
+      # Replace the "}" corresponding to this \\sqrt occurence with ")^.5"
+      right_brackets_relative = [x - occurence for x in right_brackets]
+      next_right_bracket_idx = right_brackets_relative.index(min([i for i in right_brackets_relative if i > 0]))
+      next_right_bracket = right_brackets[next_right_bracket_idx]
+      new_str = new_str[:next_right_bracket] + ")^.5" + new_str[next_right_bracket + 1:]
+
+      #update indicies after changing string
+      sqrts = [x - 2 for x in sqrts]
+      right_brackets = [x + 3 for x in right_brackets]
+    return new_str
 
 class NotEqual:
     def __eq__(self, other):
@@ -167,6 +199,9 @@ def strip_string(string):
             string = string.split("=")[1]
 
     # fix sqrt3 --> sqrt{3}
+    string = normalize_sqrt(string)
+
+    # fix sqrt for real, using Alex's method
     string = fix_sqrt(string)
 
     # remove spaces
