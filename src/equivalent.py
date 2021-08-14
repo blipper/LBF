@@ -19,6 +19,8 @@ def normalize_fracs(string):
             if substr[0] == "{":
                 new_str += substr
             else:
+                if substr[0] == " ":
+                    substr = substr[1:] # \\frac 13 -> \\frac13 -> \\frac{1}{3}
                 try:
                     assert len(substr) >= 2
                 except:
@@ -250,6 +252,7 @@ def strip_string(string):
     # remove percentage
     string = string.replace("\\%", " percent ")
     string = string.replace("\%", " percent ")
+    string = string.replace("%", " percent ")
 
     # Space out operators
     while True:

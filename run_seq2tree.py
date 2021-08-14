@@ -1,6 +1,7 @@
 # coding: utf-8
 from src.train_and_evaluate import *
 from src.models import *
+from src.equivalent import *
 import time
 import torch.optim
 from src.expressions_transfer import *
@@ -11,6 +12,13 @@ import argparse
 import pandas as pd
 
 import warnings
+
+def try_float(s):
+    try:
+        return float(s)
+    except ValueError:
+        print(f"Not a float {s}")
+        return 0.0
 
 def generate_csv(outputs,epoch):
     fieldnames = ['Id', 'Predicted']
@@ -179,7 +187,8 @@ for epoch in range(n_epochs):
                                         merge, output_lang, test_batch[3], beam_size=beam_size)
             #print(test_results)
             #test_res = test_results[0]
-            outputs.append(test_results)
+            output = strip_string(test_results)
+            outputs.append(output)
 
             for i in range (0, len(test_results)):
                 test_res = test_results[i]
