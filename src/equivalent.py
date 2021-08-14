@@ -301,8 +301,8 @@ def strip_string(string):
     for num, num_word in word_nums:
         ostring = string
         string = re.sub(rf"\b{num_word}\b",f"{num}", string, flags=re.I)
-        if (ostring != string):
-            print(f"{ostring} -> {string}")
+        # if (ostring != string):
+        #     print(f"{ostring} -> {string}")
 
     # Remove empty latex math mode
     string = string.replace("$$"," ")
