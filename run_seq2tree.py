@@ -36,7 +36,7 @@ parser.add_argument('--nstep', default=50, type=int, help='m-fix')
 parser.add_argument('--name', default='fix', type=str, help='model name')
 parser.add_argument('--number-of-problems', default='0', type=int, help='Number of training problems to use. 0 is all.')
 parser.add_argument('--cross-validate', default=True, type=bool, help='Cross validate to test accuracy')
-parser.add_argument('--batch_size', default=16, type=int, help='Batch size')
+parser.add_argument('--batch-size', default=16, type=int, help='Batch size')
 
 
 options = parser.parse_args()
