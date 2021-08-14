@@ -8,8 +8,6 @@ import sys
 import json
 import os
 import argparse
-from sklearn.model_selection import KFold
-import numpy as np
 
 import warnings
 warnings.simplefilter("ignore")
