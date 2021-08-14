@@ -79,6 +79,7 @@ def fix_frac(sample_str,original_string):
             print("Input String: " + sample_str)
             print("Updated String: " + new_str)
             print("rb relative" + str(right_brackets_relative))
+            return new_str
         next_right_bracket = right_brackets[next_right_bracket_idx]
         new_str = new_str[:next_right_bracket] + ")" + new_str[next_right_bracket + 1:]
 
