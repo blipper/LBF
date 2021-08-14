@@ -190,10 +190,10 @@ def strip_string(string):
     #print(f"starting_string: {string}")
     # linebreaks  
     original_string = string
-    string = string.replace("\n", "")
+    string = string.replace("\n", " ")
     #print(string)
 
-    # remove inverse spaces
+     # remove inverse spaces
     string = string.replace("\\!", "")
     #print(string)
 
