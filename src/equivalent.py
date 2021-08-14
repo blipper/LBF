@@ -1,4 +1,5 @@
 import re
+import math 
 
 def find_all_occurences(sample_str, sub):
     start = 0
@@ -86,6 +87,37 @@ def fix_frac(sample_str,original_string):
         new_str = new_str[:next_right_bracket] + ")" + new_str[next_right_bracket + 1:]
 
     return new_str
+
+def expand_factorial(num):
+    out_str = num + "*"
+    num = int(num)
+    while num > 1:
+        out_str += str(num-1) + "*"
+        num -= 1
+    return out_str
+
+def fix_factorial(sample_str):
+    substrs = sample_str.split("!")
+    new_str = ""
+    if len(substrs) > 1:
+        for substr in substrs:
+            next_chunk = substr
+            if next_chunk[-1].isdigit() and not next_chunk[-2].isdigit(): #1 digit factorial
+                new_str += next_chunk[:-1] #Append string up to the number
+                new_str += str(math.factorial(int(next_chunk[-1]))) #compute factorial, add to string
+            elif next_chunk[-1].isdigit() and next_chunk[-2].isdigit() and not next_chunk[-3].isdigit(): #2 digit factorial
+                new_str += next_chunk[:-2] #Append string up to the number
+                new_str += expand_factorial(next_chunk[-2:]) #Expand out the factorial
+            elif next_chunk[-1].isdigit() and next_chunk[-2].isdigit() and next_chunk[-3].isdigit(): #3 digit factorial
+                new_str += next_chunk[:-3] #Append string up to the number
+                new_str += expand_factorial(next_chunk[-3:]) #Expand out the factorial
+            else:
+                new_str += next_chunk
+    else:
+        new_str = substrs[0]
+
+    string = new_str
+    return string
 
 def fix_a_slash_b(string):
     if len(string.split("/")) != 2:
@@ -263,6 +295,9 @@ def strip_string(string):
 
     # fix fracs for real, using Alex's method
     string = fix_frac(string,original_string)
+
+    # fix factorials using Alex's method
+    string = fix_factorial(string)
 
     # NOTE: X/Y changed to \frac{X}{Y} in dataset, but in simple cases fix in case the model output is X/Y
     string = fix_a_slash_b(string)
