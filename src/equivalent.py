@@ -214,6 +214,7 @@ def strip_string(string):
     # remove Purely display latex
     string = string.replace("\\displaystyle", "")
     string = string.replace("\\mathbf", "")
+    string = string.replace("\\mathrm", "")
     string = string.replace("\\bold", "")
     string = string.replace("\\phantom", "")
     string = string.replace("\\boxed", "")

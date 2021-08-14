@@ -188,7 +188,7 @@ for epoch in range(n_epochs):
                                         merge, output_lang, test_batch[3], beam_size=beam_size)
             #print(test_results)
             #test_res = test_results[0]
-            output = strip_string(test_results)
+            output = test_results
             outputs.append(output)
 
             for i in range (0, len(test_results)):
