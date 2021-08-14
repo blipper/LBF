@@ -72,8 +72,6 @@ else:
     pairs_tested = transfer_num(data_test)
 
 
-fold = 1 #we can also iterate all the folds like GTS
-
 input_lang, output_lang, train_pairs, test_pairs = prepare_data(pairs_trained, pairs_tested, 2)
 # Initialize models
 encoder = EncoderSeq(input_size=input_lang.n_words, embedding_size=embedding_size, hidden_size=hidden_size,
@@ -129,14 +127,14 @@ for epoch in range(n_epochs):
     merge_scheduler.step()
     loss_total = 0
     input_batches, input_lengths, nums_batches, num_pos_batches, num_size_batches, num_ans_batches, num_id_batches = prepare_train_batch(train_pairs, batch_size)
-    print("fold:", fold + 1)
     print("epoch:", epoch + 1)
     start = time.time()
     mask_flag = False
     pos = 0
     epo_iteration = 0
     for idx in range(len(input_lengths)): #batch
-
+        if idx % 10 == 0:
+            print(f"Trained {idx} batches")
         if idx < 2 and epoch == 0:
             mask_flag = True
         buffer_batches_train = buffer_batches[pos : pos + len(input_lengths[idx])]
@@ -177,6 +175,8 @@ for epoch in range(n_epochs):
         start = time.time()
         outputs = []
         for k in range(len(test_pairs)):
+            if k % 1000 ==0:
+                print(f"Done {k} tests")
             test_batch = test_pairs[k]
             test_exps = []
             output_sen = ""
