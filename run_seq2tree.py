@@ -8,6 +8,8 @@ import sys
 import json
 import os
 import argparse
+from sklearn.model_selection import KFold
+import numpy as np
 
 import warnings
 warnings.simplefilter("ignore")
@@ -18,6 +20,7 @@ parser.add_argument('--model', default='fix', type=str, choices=['fix','ma-fix',
 parser.add_argument('--nstep', default=50, type=int, help='m-fix')
 parser.add_argument('--name', default='fix', type=str, help='model name')
 parser.add_argument('--number-of-problems', default='0', type=int, help='Number of training problems to use. 0 is all.')
+parser.add_argument('--cross-validate', default=True, type=bool, help='Cross validate to test accuracy')
 
 
 options = parser.parse_args()
@@ -25,6 +28,7 @@ model = options.model
 n_step = options.nstep 
 model_name = options.name
 number_of_problems = options.number_of_problems
+cross_validate = options.cross_validate
 
 batch_size = 16
 embedding_size = 128
@@ -35,35 +39,24 @@ weight_decay = 1e-5
 beam_size = 5
 n_layers = 2
 
+
 data_train = load_raw_data("data/maths_train_pretty.json", True, number_of_problems)
 data_test = load_raw_data("data/maths_test_pretty.json", False, number_of_problems)
 
-pairs_trained = transfer_num(data_train)
-pairs_tested = transfer_num(data_test)
+if cross_validate:
+    pairs_trained_whole = transfer_num(data_train)
+    train_size = int(.8*len(pairs_trained_whole))
+    test_size = int(.2*len(pairs_trained_whole))
 
+    pairs_trained, pairs_tested = torch.utils.data.random_split(pairs_trained_whole, [train_size + (len(pairs_trained_whole) - train_size - test_size),test_size])
+    print(f"KFold-Pairs Trained: {len(pairs_trained)}")
+    print(f"KFold-Pairs Tested: {len(pairs_tested)}")
+else:
+    pairs_trained = transfer_num(data_train)
+    pairs_tested = transfer_num(data_test)
 
-# pairs.append((input_seq, nums, num_pos, answer, id2))
-# for p in pairs:
-#     temp_pairs.append((p[0], p[1], p[2], p[3], p[4]))
-# pairs = temp_pairs
-# fold_size = int(len(pairs) * 0.2)
-# fold_pairs = []
-# for split_fold in range(4):
-#     fold_start = fold_size * split_fold
-#     fold_end = fold_size * (split_fold + 1)
-#     fold_pairs.append(pairs[fold_start:fold_end])
-# fold_pairs.append(pairs[(fold_size * 4):])
-
-# best_acc_fold = []
 
 fold = 1 #we can also iterate all the folds like GTS
-# pairs_tested = []
-# pairs_trained = []
-# for fold_t in range(5):
-#     if fold_t == fold:
-#         pairs_tested += fold_pairs[fold_t]
-#     else:
-#         pairs_trained += fold_pairs[fold_t]
 
 input_lang, output_lang, train_pairs, test_pairs = prepare_data(pairs_trained, pairs_tested, 1)
 # Initialize models

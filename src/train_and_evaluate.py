@@ -216,10 +216,10 @@ def train_tree(input_batch, input_length, num_size_batch,
 
     batch_size = len(input_length)
 
-    for ib_idx, ib in enumerate(input_batch):
-        output_sen = ""
-        for widx in ib:
-            output_sen += input_lang.index2word[widx] + " "
+    # for ib_idx, ib in enumerate(input_batch):
+    #     output_sen = ""
+    #     for widx in ib:
+    #         output_sen += input_lang.index2word[widx] + " "
         #print(f"input_batch {ib_idx}:  {output_sen} {input_batch}")
     # Turn padded arrays into (batch_size x max_len) tensors, transpose into (max_len x batch_size)
     input_var = torch.LongTensor(input_batch).transpose(0, 1)
