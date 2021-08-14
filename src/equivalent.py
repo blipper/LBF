@@ -250,7 +250,7 @@ def strip_string(string):
     string = normalize_fracs(string)
 
     # fix fracs for real, using Alex's method
-    string = fix_frac(string)
+    #string = fix_frac(string)
 
     # NOTE: X/Y changed to \frac{X}{Y} in dataset, but in simple cases fix in case the model output is X/Y
     string = fix_a_slash_b(string)
