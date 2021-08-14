@@ -8,8 +8,17 @@ import sys
 import json
 import os
 import argparse
+import pandas as pd
 
 import warnings
+
+def generate_csv(outputs,epoch):
+    fieldnames = ['Id', 'Predicted']
+    outputs_real = [try_float(s) for s in outputs]
+    rows = {'Id': range(len(outputs_real)), 'Predicted': outputs_real}
+    dataframe = pd.DataFrame(rows, columns=fieldnames)
+    dataframe.to_csv('predicted-epoch-'+str(epoch)+'.csv', index=False)
+
 warnings.simplefilter("ignore")
 
 parser = argparse.ArgumentParser()
@@ -157,6 +166,7 @@ for epoch in range(n_epochs):
         value_ac5 = 0
         eval_total5 = 0
         start = time.time()
+        outputs = []
         for k in range(len(test_pairs)):
             test_batch = test_pairs[k]
             test_exps = []
@@ -169,6 +179,8 @@ for epoch in range(n_epochs):
                                         merge, output_lang, test_batch[3], beam_size=beam_size)
             #print(test_results)
             #test_res = test_results[0]
+            outputs.append(test_results)
+
             for i in range (0, len(test_results)):
                 test_res = test_results[i]
                 val_ac, test_exp = compute_prefix_tree_result(test_res, test_batch[4], output_lang, test_batch[2])
@@ -197,7 +209,7 @@ for epoch in range(n_epochs):
             # buffer_dict['ans'].append(data[id2]['ans'])
             # buffer_dict['gt_equation'].append(data[id2]['equation'])
             # buffer_dict['gen_equations'].append(test_exps)
-
+        generate_csv(outputs,epoch)
         stats['test_epoch'].append (epoch)
         stats['test_result_acc3'].append(float(value_ac3) / eval_total3)
         stats['test_result_acc1'].append(float(value_ac1) / eval_total1)
