@@ -37,7 +37,7 @@ model_name = options.name
 number_of_problems = options.number_of_problems
 cross_validate = options.cross_validate
 
-batch_size = 16
+batch_size = 64
 embedding_size = 128
 hidden_size = 512
 n_epochs = 100
@@ -65,7 +65,7 @@ else:
 
 fold = 1 #we can also iterate all the folds like GTS
 
-input_lang, output_lang, train_pairs, test_pairs = prepare_data(pairs_trained, pairs_tested, 1)
+input_lang, output_lang, train_pairs, test_pairs = prepare_data(pairs_trained, pairs_tested, 5)
 # Initialize models
 encoder = EncoderSeq(input_size=input_lang.n_words, embedding_size=embedding_size, hidden_size=hidden_size,
                         n_layers=n_layers)

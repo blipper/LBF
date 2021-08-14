@@ -1,4 +1,5 @@
 import re
+import inflect
 
 def find_all_occurences(sample_str, sub):
     start = 0
@@ -170,8 +171,18 @@ class NotEqual:
     def __eq__(self, other):
         return False
 
+# Can only use non-vowels otherwise english collision risk is too high
+variables_mult_regex = re.compile(r"([wqxyz])([wqxyz])")
+
 image_regex = re.compile(r"\[asy\].*\[/asy\]", re.MULTILINE + re.DOTALL)
-math_regex = re.compile(r"(\d+)([*\-+/])(\d+)")
+math_regex = re.compile(r"([\w\d\(\)]+)([*\-+/^])([\w\d\(\)\\]+)")
+inflector = inflect.engine()
+quick_sqrt = re.compile(r"\sqrt(\d)")
+word_nums = []
+for i in range(99):
+    word_nums+= [(i, inflector.number_to_words(i))]
+
+    
 
 def strip_string(string):
     #print(f"starting_string: {string}")
@@ -204,7 +215,14 @@ def strip_string(string):
     string = string.replace("\\bold", "")
     string = string.replace("\\phantom", "")
     string = string.replace("\\boxed", "")
+    string = string.replace("\\text", "")
+
     
+    # convert latex brackets
+    string = string.replace("\\[", " [ ")
+    string = string.replace("\\]", " ] ")
+
+
 
     # Remove circ (degrees)
     string = string.replace("^{\\circ}", "")
@@ -216,6 +234,9 @@ def strip_string(string):
     # pi
     string = string.replace("\\pi", "3.14")
 
+    string = string.replace("\\le", "less than or equal to")
+    string = string.replace("\\ge", "greather than or equal to")
+
     string = image_regex.sub("", string)
 
     # remove units (on the right)
@@ -223,14 +244,19 @@ def strip_string(string):
 
     string = string.replace("\\cdot", "*")
     string = string.replace("\\times", "*")
+    string = string.replace("\\div", "/")
    
 
     # remove percentage
-    string = string.replace("\\%", "")
-    string = string.replace("\%", "")
+    string = string.replace("\\%", " percent ")
+    string = string.replace("\%", " percent ")
 
     # Space out operators
-    string = math_regex.sub(r"\1 \2 \3", string)
+    while True:
+        new_string = math_regex.sub(r" \1 \2 \3 ", string)
+        if new_string == string:
+            break
+        string = new_string 
 
     # " 0." equivalent to " ." and "{0." equivalent to "{." Alternatively, add "0" if "." is the start of the string
     string = string.replace(" .", " 0.")
@@ -246,8 +272,13 @@ def strip_string(string):
         if len(string.split("=")[0]) <= 2:
             string = string.split("=")[1]
 
+    # Space out implicit variable operators
+    string = variables_mult_regex.sub(r"\1 * \2", string)
+
     # fix sqrt3 --> sqrt{3}
     string = normalize_sqrt(string)
+
+    string = quick_sqrt.sub(r"\1 ^ 0.5", string)
 
     # fix sqrt for real, using Alex's method
     string = fix_sqrt(string)
@@ -264,22 +295,24 @@ def strip_string(string):
     # NOTE: X/Y changed to \frac{X}{Y} in dataset, but in simple cases fix in case the model output is X/Y
     string = fix_a_slash_b(string)
 
-    string = string.replace(" one ","1")
-    string = string.replace(" two ","2")
-    string = string.replace(" three ","3")
-    string = string.replace(" four ","4")
-    string = string.replace(" five ","5")
-    string = string.replace(" six ","6")
-    string = string.replace(" seven ","7")
-    string = string.replace(" eight ","8")
-    string = string.replace(" nine ","9")
-    string = string.replace(" zero ","0")
-
+    for num, num_word in word_nums:
+        ostring = string
+        string = re.sub(rf"\b{num_word}\b",f"{num}", string, flags=re.I)
+        if (ostring != string):
+            print(f"{ostring} -> {string}")
 
     # Remove empty latex math mode
-    string = string.replace("$$","")
+    string = string.replace("$$"," ")
+    string = string.replace("$"," ")
+    string = string.replace("="," equals ")
+    string = string.replace("(", " ( ")
+    string = string.replace(")", " ) ")
+    string = string.replace("{", " { ")
+    string = string.replace("}", " } ")
+
+
     string = string.strip()
-    #print(f"striped_string: {string}")
+    print(f"orignal_string: {original_string} striped_string: {string}")
     return string
 
 def is_equiv(str1, str2, verbose=False):

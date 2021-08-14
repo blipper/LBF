@@ -184,6 +184,7 @@ def transfer_num(data):  # transfer num into "NUM"
             print(f"WARNING: Can't find any numbrs in {retPair}. Skipping.")
         else:
             pairs.append(retPair)
+            print(f"retPair: {retPair}")
         # pairs.append((input_seq, out_seq, nums, num_pos, d["ans"]))
         
     #     string = str(len(nums))
