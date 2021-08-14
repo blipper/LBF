@@ -237,6 +237,9 @@ def strip_string(string):
     # pi
     string = string.replace("\\pi", "3.14")
 
+    # Convert english exponent to python one
+    string = string.replace("^", " ** ")
+
     string = string.replace("\\le", "less than or equal to")
     string = string.replace("\\ge", "greather than or equal to")
 
@@ -282,7 +285,7 @@ def strip_string(string):
     # fix sqrt3 --> sqrt{3}
     string = normalize_sqrt(string)
 
-    string = quick_sqrt.sub(r"\1 ^ 0.5", string)
+    string = quick_sqrt.sub(r"\1 ** 0.5", string)
 
     # fix sqrt for real, using Alex's method
     string = fix_sqrt(string)
