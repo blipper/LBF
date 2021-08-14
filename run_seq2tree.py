@@ -73,7 +73,7 @@ else:
 
 fold = 1 #we can also iterate all the folds like GTS
 
-input_lang, output_lang, train_pairs, test_pairs = prepare_data(pairs_trained, pairs_tested, 5)
+input_lang, output_lang, train_pairs, test_pairs = prepare_data(pairs_trained, pairs_tested, 2)
 # Initialize models
 encoder = EncoderSeq(input_size=input_lang.n_words, embedding_size=embedding_size, hidden_size=hidden_size,
                         n_layers=n_layers)
