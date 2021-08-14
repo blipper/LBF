@@ -61,8 +61,8 @@ data_test = load_raw_data("data/maths_test_pretty.json", False, number_of_proble
 
 if cross_validate:
     pairs_trained_whole = transfer_num(data_train)
-    train_size = int(.8*len(pairs_trained_whole))
-    test_size = int(.2*len(pairs_trained_whole))
+    train_size = int(.9*len(pairs_trained_whole))
+    test_size = int(.1*len(pairs_trained_whole))
 
     pairs_trained, pairs_tested = torch.utils.data.random_split(pairs_trained_whole, [train_size + (len(pairs_trained_whole) - train_size - test_size),test_size])
     print(f"KFold-Pairs Trained: {len(pairs_trained)}")
