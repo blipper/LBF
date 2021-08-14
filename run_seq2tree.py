@@ -219,7 +219,7 @@ for epoch in range(n_epochs):
             # buffer_dict['ans'].append(data[id2]['ans'])
             # buffer_dict['gt_equation'].append(data[id2]['equation'])
             # buffer_dict['gen_equations'].append(test_exps)
-        generate_csv(outputs,epoch)
+        #generate_csv(outputs,epoch)
         stats['test_epoch'].append (epoch)
         stats['test_result_acc3'].append(float(value_ac3) / eval_total3)
         stats['test_result_acc1'].append(float(value_ac1) / eval_total1)
