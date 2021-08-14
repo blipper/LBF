@@ -39,7 +39,7 @@ def normalize_fracs(string):
     string = new_str
     return string
 
-def fix_frac(sample_str):
+def fix_frac(sample_str,original_string):
     new_str = sample_str
     left_brackets = list(find_all_occurences(new_str, '{'))
     right_brackets = list(find_all_occurences(new_str, '}'))
@@ -75,7 +75,8 @@ def fix_frac(sample_str):
             next_right_bracket_idx = right_brackets_relative.index(min([i for i in right_brackets_relative if i > 0]))
         except:
             print("FAILED FIX FRAC")
-            print("Original String: " + sample_str)
+            print("Original String: " + original_string)
+            print("Input String: " + sample_str)
             print("Updated String: " + new_str)
             print("rb relative" + str(right_brackets_relative))
         next_right_bracket = right_brackets[next_right_bracket_idx]
@@ -174,6 +175,7 @@ math_regex = re.compile(r"(\d+)([*\-+/])(\d+)")
 def strip_string(string):
     #print(f"starting_string: {string}")
     # linebreaks  
+    original_string = string
     string = string.replace("\n", "")
     #print(string)
 
@@ -256,7 +258,7 @@ def strip_string(string):
     string = normalize_fracs(string)
 
     # fix fracs for real, using Alex's method
-    string = fix_frac(string)
+    string = fix_frac(string,original_string)
 
     # NOTE: X/Y changed to \frac{X}{Y} in dataset, but in simple cases fix in case the model output is X/Y
     string = fix_a_slash_b(string)
