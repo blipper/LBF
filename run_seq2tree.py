@@ -36,7 +36,6 @@ parser.add_argument('--nstep', default=50, type=int, help='m-fix')
 parser.add_argument('--name', default='fix', type=str, help='model name')
 parser.add_argument('--number-of-problems', default='0', type=int, help='Number of training problems to use. 0 is all.')
 parser.add_argument('--cross-validate', default=True, type=bool, help='Cross validate to test accuracy')
-parser.add_argument('--batch-size', default=16, type=int, help='Batch size')
 
 
 options = parser.parse_args()
@@ -46,7 +45,7 @@ model_name = options.name
 number_of_problems = options.number_of_problems
 cross_validate = options.cross_validate
 
-batch_size = options.batch_size
+batch_size = 16
 embedding_size = 128
 hidden_size = 512
 n_epochs = 100
@@ -61,8 +60,8 @@ data_test = load_raw_data("data/maths_test_pretty.json", False, number_of_proble
 
 if cross_validate:
     pairs_trained_whole = transfer_num(data_train)
-    train_size = int(.9*len(pairs_trained_whole))
-    test_size = int(.1*len(pairs_trained_whole))
+    train_size = int(.8*len(pairs_trained_whole))
+    test_size = int(.2*len(pairs_trained_whole))
 
     pairs_trained, pairs_tested = torch.utils.data.random_split(pairs_trained_whole, [train_size + (len(pairs_trained_whole) - train_size - test_size),test_size])
     print(f"KFold-Pairs Trained: {len(pairs_trained)}")
@@ -72,7 +71,9 @@ else:
     pairs_tested = transfer_num(data_test)
 
 
-input_lang, output_lang, train_pairs, test_pairs = prepare_data(pairs_trained, pairs_tested, 2)
+fold = 1 #we can also iterate all the folds like GTS
+
+input_lang, output_lang, train_pairs, test_pairs = prepare_data(pairs_trained, pairs_tested, 1)
 # Initialize models
 encoder = EncoderSeq(input_size=input_lang.n_words, embedding_size=embedding_size, hidden_size=hidden_size,
                         n_layers=n_layers)
@@ -127,14 +128,14 @@ for epoch in range(n_epochs):
     merge_scheduler.step()
     loss_total = 0
     input_batches, input_lengths, nums_batches, num_pos_batches, num_size_batches, num_ans_batches, num_id_batches = prepare_train_batch(train_pairs, batch_size)
+    print("fold:", fold + 1)
     print("epoch:", epoch + 1)
     start = time.time()
     mask_flag = False
     pos = 0
     epo_iteration = 0
     for idx in range(len(input_lengths)): #batch
-        if idx % 10 == 0:
-            print(f"Trained {idx} batches")
+
         if idx < 2 and epoch == 0:
             mask_flag = True
         buffer_batches_train = buffer_batches[pos : pos + len(input_lengths[idx])]
@@ -175,8 +176,6 @@ for epoch in range(n_epochs):
         start = time.time()
         outputs = []
         for k in range(len(test_pairs)):
-            if k % 1000 ==0:
-                print(f"Done {k} tests")
             test_batch = test_pairs[k]
             test_exps = []
             output_sen = ""
@@ -188,7 +187,7 @@ for epoch in range(n_epochs):
                                         merge, output_lang, test_batch[3], beam_size=beam_size)
             #print(test_results)
             #test_res = test_results[0]
-            output = test_results
+            output = strip_string(test_results)
             outputs.append(output)
 
             for i in range (0, len(test_results)):
@@ -219,7 +218,7 @@ for epoch in range(n_epochs):
             # buffer_dict['ans'].append(data[id2]['ans'])
             # buffer_dict['gt_equation'].append(data[id2]['equation'])
             # buffer_dict['gen_equations'].append(test_exps)
-        #generate_csv(outputs,epoch)
+        generate_csv(outputs,epoch)
         stats['test_epoch'].append (epoch)
         stats['test_result_acc3'].append(float(value_ac3) / eval_total3)
         stats['test_result_acc1'].append(float(value_ac1) / eval_total1)
