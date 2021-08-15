@@ -238,7 +238,7 @@ def strip_string(string):
     string = string.replace("\\pi", "3.14")
 
     # Convert english exponent to python one
-    string = string.replace("^", " ** ")
+    #string = string.replace("^", " ** ")
 
     string = string.replace("\\le", "less than or equal to")
     string = string.replace("\\ge", "greather than or equal to")
